@@ -332,6 +332,8 @@ def do_stuff():
 
 类似的，Python 里的 `for/while` 循环也支持添加 `else` 分支，它们表示：当循环使用的迭代对象被正常耗尽、或 while 循环使用的条件变量变为 False 后才执行 else 分支下的代码。
 
+<font color=palevioletred>python还可以在feor/while/try这些东西后面接else</font>
+
 ## 常见陷阱
 
 ### 1. 与 None 值的比较
@@ -358,6 +360,14 @@ True
 在上面代码中，Foo 这个类通过自定义 `__eq__` 魔法方法的方式，很容易就满足了 `== None` 这个条件。
 
 **所以，当你要判断某个变量是否为 None 时，请使用 `is` 而不是 `==`。**
+
+<font color=palevioletred>他这里的意思是啥，首先`__eq__`是用来判断两个对象是否完全相同，完全相同表示的是这两个对象对应的属性是否一样。`==`是用来表示a和b指向的内存单元中的值是否相等，比较两个对象的内容是否相等，默认会调用对象的`__eq__`方法。`is`是表示两个东西是否在同一块内存空间上，这个例子是属于重载了`__eq__`方法，所以你对`foo()`使用`==`的时候结果总是`True`</font>
+
+<font color=palevioletred>[Python __eq__](https://www.pythontutorial.net/python-oop/python-__eq__/#:~:text=Python%20automatically%20calls%20the%20__,the%20__eq__%20method.)</font>
+
+> <font color=palevioletred>Python automatically calls the `__eq__` *method of a class when you use the == operator to compare the instances of the class*. By default, Python uses the `is` *operator if you don’t provide a specific implementation for the __eq__ method.*</font>
+>
+> <font color=palevioletred>如果你不定义`__eq__`，python默认给你调用的是`is`方法，所以你比较起来总是false，因为这些对象不是同一块内存上的</font>
 
 ### 2. 留意 and 和 or 的运算优先级
 
