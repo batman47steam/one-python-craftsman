@@ -94,6 +94,8 @@ def mark_trip_as_featured(trip):
 
 当然，你完全没有必要把代码里的所有字面量都改成枚举类型。 **代码里出现的字面量，只要在它所处的上下文里面容易理解，就可以使用它。** 比如那些经常作为数字下标出现的 `0` 和 `-1` 就完全没有问题，因为所有人都知道它们的意思。
 
+<font color=palevioletred>枚举，c++里面也有枚举，不过这里怎么感觉和结构体差不多</font>
+
 ### 2. 别在裸字符串处理上走太远
 
 什么是“裸字符串处理”？在这篇文章里，它指**只使用基本的加减乘除和循环、配合内置函数/方法来操作字符串，获得我们需要的结果。**
@@ -332,6 +334,7 @@ Python 的字符串有着非常多实用的内建方法，最常用的有 `.stri
 ['"AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.77 Safari/537.36"', '47632']
 ```
 
+<font color=palevioletred>`rsplit(separator, maxsplit)`和`split()`差不多，只不过是方向相反, `None`是说默认用空格进行分割？</font>
 
 ### 4. 使用“无穷大” float("inf")
 
@@ -357,6 +360,28 @@ Python 的字符串有着非常多实用的内建方法，最常用的有 `.stri
 >>> max_num
 71
 ```
+
+<font color=palevioletred>第一个`sort`的逻辑其实和c++里面`sort`的逻辑很像吧，key后面是一个`lambda`表达式，这个`lambda`表达式是运行在每一个输入元素上的，就是每次输入的一个元素都是user，lambda表达式返回的，要不然是`users.get(user)`，如果没提供年龄的，肯定就返回`float('inf')`了</font>
+
+<font color=palevioletred>第二个感觉是为了让操作比较统一？要不然我肯定是先要把第一个元素设置成最大，后面的元素再跟第一个元素比较？</font>
+
+> Both `list.sort()` and `sorted()` have a key parameter to specify a function (or other callable) to be called on each list element prior to making comparisions
+>
+> A common pattern is to sort complex objects using some of the object's indices as keys
+>
+> ```python
+> >>> student_tuples = [
+> ...     ('john', 'A', 15),
+> ...     ('jane', 'B', 12),
+> ...     ('dave', 'B', 10),
+> ... ]
+> >>> sorted(student_tuples, key=lambda student: student[2])   # sort by age
+> [('dave', 'B', 10), ('jane', 'B', 12), ('john', 'A', 15)]
+> ```
+>
+> 这个我理解的是把第二个indices来当作排序的依据
+>
+> https://docs.python.org/3/howto/sorting.html
 
 ## 常见误区
 
@@ -422,5 +447,4 @@ Python 的字符串拼接在 2.2 以及之前的版本确实很慢，和我最�
 [>>>下一篇【4.容器的门道】](4-mastering-container-types.md)
 
 [<<<上一篇【2.编写条件分支代码的技巧】](2-if-else-block-secrets.md)
-
 
