@@ -43,7 +43,6 @@ Python 语言自身的内部实现细节也与这些容器类型息息相关。�
   - [系列其他文章](#系列其他文章)
   - [注解](#注解)
 
-
 ### 当我们谈论容器时，我们在谈些什么？
 
 我在前面给了“容器”一个简单的定义：*专门用来装其他对象的就是容器*。但这个定义太宽泛了，无法对我们的日常编程产生什么指导价值。要真正掌握 Python 里的容器，需要分别从两个层面入手：
@@ -52,7 +51,6 @@ Python 语言自身的内部实现细节也与这些容器类型息息相关。�
 - **高层抽象**：什么决定了某个对象是不是容器？哪些行为定义了容器？
 
 下面，让我们一起站在这两个不同的层面上，重新认识容器。
-
 
 ## 底层看容器
 
@@ -76,7 +74,13 @@ Python 是一门高级编程语言，**它所提供的内置容器类型，都�
 
 在 Python 2 中，如果你调用 `range(100000000)`，需要等待好几秒才能拿到结果，因为它需要返回一个巨大的列表，花费了非常多的时间在内存分配与计算上。但在 Python 3 中，同样的调用马上就能拿到结果。因为函数返回的不再是列表，而是一个类型为 `range` 的懒惰对象，只有在你迭代它、或是对它进行切片时，它才会返回真正的数字给你。
 
+<font color=palevioletred>原本是把整个list全部算好给你，现在是你迭代他，使用他的时候才会返回数值给你</font>
+
 **所以说，为了提高性能，内建函数 `range` “变懒”了。** 而为了避免过于频繁的内存分配，在日常编码中，我们的函数同样也需要变懒，这包括：
+
+##### 2022-3-10
+
+[<font color=palevioletred>yield可以参考下这里，没看完</font>](https://realpython.com/introduction-to-python-generators/)
 
 - 更多的使用 `yield` 关键字，返回生成器对象
 - 尽量使用生成器表达式替代列表推导表达式
@@ -95,6 +99,8 @@ Python 是一门高级编程语言，**它所提供的内置容器类型，都�
 #### 3. 使用集合/字典来判断成员是否存在
 
 当你需要判断成员是否存在于某个容器时，用集合比列表更合适。因为 `item in [...]` 操作的时间复杂度是 `O(n)`，而 `item in {...}` 的时间复杂度是 `O(1)`。这是因为字典与集合都是基于哈希表（Hash Table）数据结构实现的。
+
+<font color=palevioletred>用hash表的查询肯定是很快的，c++里面也是这样，他这里说的集合还不太清楚是什么，应该和c++里面的一样，std::set本质和std::map差不多，可以看作是没有value的map</font>
 
 ```python
 # 这个例子不是特别恰当，因为当目标集合特别小时，使用集合还是列表对效率的影响微乎其微
@@ -170,11 +176,13 @@ print("\n".join(add_ellipsis(comments)))
 
 那样的话，现有的函数设计就会逼迫我们写出 `add_ellipsis(list(comments))` 这种即慢又难看的代码了。😨
 
-#### 面向容器接口编程
+#### 面向容器接口编程 (<font color=palevioletred>这个有点出乎意料</font>)
 
 我们需要改进函数来避免这个问题。因为 `add_ellipsis` 函数强依赖了列表类型，所以当参数类型变为元组时，现在的函数就不再适用了*（原因：给 `comments[index]` 赋值的地方会抛出 `TypeError` 异常）。* 如何改善这部分的设计？秘诀就是：**让函数依赖“可迭代对象”这个抽象概念，而非实体列表类型。**
 
 使用生成器特性，函数可以被改成这样：
+
+<font color=palevioletred>这个东西的本质是什么，用yield每次返回值，并不会结束这个函数，如果不用生成器之类的东西，你想要修改所有评论，那你必须把装有评论的这个容器里面的每个元素都修改好，再返回。用了yield相当于我每次直接返回了我想要的内容，而避开了对容器里元素的操作</font>
 
 ```python
 def add_ellipsis_gen(comments: typing.Iterable[str], max_length: int = 12):
@@ -332,6 +340,8 @@ print(next(i for i in numbers if i % 2 == 0))
 
 ### 4. 使用有序字典来去重
 
+<font color=palevioletred>在C++里面也是这样的，set里面是有顺序的，且不包含重复的元素，unordered set是没顺序的</font>
+
 字典和集合的结构特点保证了它们的成员不会重复，所以它们经常被用来去重。但是，使用它们俩去重后的结果会丢失原有列表的顺序。这是由底层数据结构“哈希表（Hash Table）”的特点决定的。
 
 ```python
@@ -358,6 +368,32 @@ print(next(i for i in numbers if i % 2 == 0))
 ### 1. 当心那些已经枯竭的迭代器
 
 在文章前面，我们提到了使用“懒惰”生成器的种种好处。但是，所有事物都有它的两面性。生成器的最大的缺点之一就是：**它会枯竭**。当你完整遍历过它们后，之后的重复遍历就不能拿到任何新内容了。
+
+<font color=palevioletred>用括号写成`(i*2 for i in numbers)`就是一个生成器，生成器第二次遍历就拿不到任何内容了，我理解的是，其实这些生成器，你可以理解为函数里面有一个for循环，for循环里面每次用`yield`返回，实际的机制是你每次调用的时候，他执行到`yield`，函数就先停止了，先把本次的结果返回，然后后续再执行</font>
+
+<font color=palevioletred>类似于下面这个，这个函数也就只能`next`两次</font>
+
+```python
+>>> def multi_yield():
+...     yield_str = "This will print the first string"
+...     yield yield_str
+...     yield_str = "This will print the second string"
+...     yield yield_str
+...
+>>> multi_obj = multi_yield()
+>>> print(next(multi_obj))
+This will print the first string
+>>> print(next(multi_obj))
+This will print the second string
+>>> print(next(multi_obj))
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+StopIteration
+
+
+```
+
+
 
 ```python
 numbers = [1, 2, 3]
